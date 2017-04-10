@@ -9,6 +9,16 @@ var noteBalloonRadius = 12;
 var noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 var keyList =        ["C", "G", "D", "A", "E", "B", "F#", "Db", "Ab", "Eb", "Bb", "F"];
 var midiRootForKey = [60,   55,  62,  57,  52,  59,   54,   61,   56,   63,  58,   53];
+var modeNameList = ["ionian (major)", "dorian", "phrygian", "lydian", "mixolydian", "aeolian (minor)", "locrian"];
+var ionian = [0, 2, 4, 5, 7, 9, 11];
+var dorian = [0, 2, 3, 5, 7, 9, 10];
+var phrygian = [0, 1, 3, 5, 7, 8, 10];
+var lydian = [0, 2, 4, 6, 7, 9, 11];
+var mixolydian = [0, 2, 4, 5, 7, 9, 10 ];
+var aeolian = [0, 2, 3, 5, 7, 8, 10];
+var locrian = [0, 1, 3, 5, 6, 8, 10 ];
+var modeList = [ionian, dorian, phrygian, lydian, mixolydian, aeolian, locrian];
+
 var notesInCurrentKey = [];
 var keySelector;
 var seventhCheckbox, tenthCheckbox, showScaleNotesCheckbox;
@@ -32,6 +42,14 @@ function addControls() {
     keySelector.option(keyList[nxt]);
   }
   keySelector.changed(newKey);
+
+  
+  modeSelector = createSelect();
+  modeSelector.position(xOffset + 50, 25)
+  for (var nxt = 0; nxt < modeNameList.length; nxt++) {
+    modeSelector.option(modeNameList[nxt]);
+  }
+  modeSelector.changed(newKey);  // same routine handles change to mode or key
   
   showScaleNotesCheckbox = createCheckbox("show notes in scale");
   showScaleNotesCheckbox.position(xOffset, 50);
@@ -152,9 +170,6 @@ function FretPos(string, midiNote, fretNum, wd, ht) {
           stroke(220, 220, 0);
           noFill();
         }
-        
-        //console.log("midi note " + this.midiNote + " is in the scale");
-        
         ellipse(this.x + this.wd/2, circleYpos, noteBalloonRadius*2 - 8, noteBalloonRadius*2 - 8);
       }
     }
@@ -213,19 +228,19 @@ var newKey = function() {
   var index = keyList.indexOf(newKey);
   var midiRoot = midiRootForKey[index];
   
+  var newModeName = modeSelector.selected();
+  index = modeNameList.indexOf(newModeName);
+  var thisMode = modeList[index];
+  
   notesInCurrentKey = [];
   for (var octave = 0; octave < 5; octave++) { // 5 octaves worth. . . 
     var root = midiRoot + (octave * 12);
-    notesInCurrentKey.push(root);
-    notesInCurrentKey.push(root + 2);
-    notesInCurrentKey.push(root + 4);
-    notesInCurrentKey.push(root + 5);
-    notesInCurrentKey.push(root + 7);
-    notesInCurrentKey.push(root + 9);
-    notesInCurrentKey.push(root + 11);
+    for (var nxtNote = 0; nxtNote < thisMode.length; nxtNote++) {
+      notesInCurrentKey.push(root + thisMode[nxtNote]);
+    }
   }
-  notesInCurrentKey.push(midiRoot + 6*12); 
-  
+  notesInCurrentKey.push(midiRoot + 6*12);   
+  console.log(notesInCurrentKey);
 }
 
 var checkboxChanged = function() {
